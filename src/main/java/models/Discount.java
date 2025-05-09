@@ -5,13 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class Product {
+@AllArgsConstructor
+public class Discount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,14 +29,16 @@ public class Product {
 
     private String brand;
 
-    @Enumerated(EnumType.STRING)
-    private PackageUnit packageQuantity;
-
-    private String packageUnit;
-
-    private Double price;
+    private Double packageQuantity;
 
     @Enumerated(EnumType.STRING)
-    private Currency currency;
+    private PackageUnit packageUnit;
 
+    private LocalDate dateFrom;
+
+    private LocalDate dateTo;
+
+    @Min(0)
+    @Max(100)
+    private Integer percentage;
 }
