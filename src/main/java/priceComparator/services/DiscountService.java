@@ -1,9 +1,9 @@
-package services;
+package priceComparator.services;
 
-import models.Discount;
+import priceComparator.models.Discount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.DiscountRepository;
+import priceComparator.repositories.DiscountRepository;
 
 import java.util.List;
 

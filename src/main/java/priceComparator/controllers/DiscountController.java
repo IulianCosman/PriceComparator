@@ -1,10 +1,10 @@
-package controllers;
+package priceComparator.controllers;
 
-import models.Discount;
+import priceComparator.models.Discount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import services.DiscountService;
+import priceComparator.services.DiscountService;
 
 import java.util.List;
 

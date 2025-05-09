@@ -1,4 +1,4 @@
-package models;
+package priceComparator.models;
 
 public enum Currency {
     RON,
