@@ -26,9 +26,9 @@ public class Product {
     private String brand;
 
     @Enumerated(EnumType.STRING)
-    private PackageUnit packageQuantity;
+    private PackageUnit packageUnit;
 
-    private String packageUnit;
+    private String packageQuantity;
 
     private Double price;
 
