@@ -1,11 +1,11 @@
 package priceComparator;
 
 import jakarta.transaction.Transactional;
-import priceComparator.models.Currency;
-import priceComparator.models.Product;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import priceComparator.models.Currency;
+import priceComparator.models.Product;
 import priceComparator.repositories.ProductRepository;
 
 import java.util.Optional;
@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-
 public class ProductServiceTest {
 
     @Autowired
