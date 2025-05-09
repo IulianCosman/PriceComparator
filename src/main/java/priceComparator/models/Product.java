@@ -1,4 +1,4 @@
-package models;
+package priceComparator.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

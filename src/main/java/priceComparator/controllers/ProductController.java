@@ -1,10 +1,10 @@
-package controllers;
+package priceComparator.controllers;
 
-import models.Product;
+import priceComparator.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import services.ProductService;
+import priceComparator.services.ProductService;
 
 import java.util.List;
 

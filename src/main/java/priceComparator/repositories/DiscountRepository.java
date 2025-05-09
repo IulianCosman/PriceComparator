@@ -1,6 +1,6 @@
-package repositories;
+package priceComparator.repositories;
 
-import models.Discount;
+import priceComparator.models.Discount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
