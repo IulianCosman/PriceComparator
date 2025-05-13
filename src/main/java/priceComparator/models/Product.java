@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// Product class
 @Entity
 @Getter
 @Setter
@@ -17,6 +18,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "productId", unique = true, nullable = false)
     private String productId;
 
     private String name;
