@@ -4,11 +4,15 @@ import priceComparator.models.Discount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import priceComparator.models.DiscountedProductDTO;
+import priceComparator.dtos.DiscountedProductDTO;
 import priceComparator.services.DiscountService;
 
 import java.util.List;
 
+/**
+ * REST controller that handles HTTP requests related to {@link Discount} entities.
+ * Provides endpoints to manage discounts, view current and top deals.
+ */
 @RestController
 @RequestMapping("/discounts")
 public class DiscountController {
@@ -16,21 +20,35 @@ public class DiscountController {
     @Autowired
     private DiscountService discountService;
 
-    // Get all discounts ever
+    /**
+     * Retrieves all discounts from the database (including expired).
+     *
+     * @return a list of all {@link Discount} entities.
+     */
     @GetMapping
     public List<Discount> getAllDiscounts(){
         return discountService.getAllDiscounts();
     }
 
-    // Save/create a discount
+    /**
+     * Creates a new discount in the database.
+     *
+     * @param discount the {@link Discount} entity to save.
+     * @return the saved {@link Discount}.
+     */
     @PostMapping
     public Discount createDiscount(@RequestBody Discount discount){
         return discountService.saveDiscount(discount);
     }
 
-    // Get a discount by its id
+    /**
+     * Retrieves a discount by its unique ID.
+     *
+     * @param id the discount ID (from the path).
+     * @return the {@link Discount} if found, otherwise 404 Not Found.
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<Discount> getDiscountById(@RequestBody Long id){
+    public ResponseEntity<Discount> getDiscountById(@PathVariable Long id){
         Discount discount = discountService.getDiscountById(id);
         if(discount != null){
             return ResponseEntity.ok(discount);
@@ -40,19 +58,33 @@ public class DiscountController {
         }
     }
 
-    // Get all current discounts
+    /**
+     * Retrieves all currently active discounts.
+     *
+     * @return a list of {@link DiscountedProductDTO} representing active discounts.
+     */
     @GetMapping("/current")
     public List<DiscountedProductDTO> getAllCurrentDiscounts() {
         return discountService.getAllCurrentDiscounts();
     }
 
-    // Get top discounts by price per unit
+    /**
+     * Retrieves top discounted products sorted by price per unit.
+     *
+     * @param limit the maximum number of results to return (default is 5).
+     * @return a list of {@link DiscountedProductDTO} with best price/unit deals.
+     */
     @GetMapping("/topPricePerUnit")
     public List<DiscountedProductDTO> getTopDiscountsByPricePerUnit(@RequestParam(defaultValue = "5") int limit) {
         return discountService.getTopDiscountsByPricePerUnit(limit);
     }
 
-    // Get top discounts by discount percentage
+    /**
+     * Retrieves top discounted products sorted by discount percentage.
+     *
+     * @param limit the maximum number of results to return (default is 5).
+     * @return a list of {@link DiscountedProductDTO} with highest discounts.
+     */
     @GetMapping("/topDiscount")
     public List<DiscountedProductDTO> getTopDiscountsByDiscount(@RequestParam(defaultValue = "5") int limit) {
         return discountService.getTopDiscountsByDiscount(limit);
