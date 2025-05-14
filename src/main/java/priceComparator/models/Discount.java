@@ -29,13 +29,11 @@ public class Discount {
     private Long id;
 
     /**
-     * Product linked to this discount.
-     * Matched via business key 'productId', not primary key.
-     * Only fetched when needed.
+     * External/business product ID this discount refers to.
+     *
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productId", referencedColumnName = "productId")
-    private Product product;
+    @Column(nullable = false)
+    private String productId;
 
     /**
      * Name of the product as listed in the discount entry.
@@ -88,4 +86,16 @@ public class Discount {
     @Min(0)
     @Max(100)
     private Integer percentage;
+
+    /**
+     * Store that offers the discount (e.g., "Lidl").
+     */
+    @Column(nullable = false)
+    private String storeName;
+
+    /**
+     * Date this discount data was added (from CSV filename).
+     */
+    @Column(nullable = false)
+    private LocalDate dateAdded;
 }

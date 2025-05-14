@@ -5,10 +5,13 @@ import priceComparator.models.Discount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import priceComparator.dtos.DiscountedProductDTO;
+import priceComparator.models.Product;
 import priceComparator.repositories.DiscountRepository;
+import priceComparator.repositories.ProductRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +23,9 @@ public class DiscountService {
 
     @Autowired
     private DiscountRepository discountRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     /**
      * Retrieves all discounts from the database (active or not).
@@ -99,11 +105,22 @@ public class DiscountService {
      * @return a fully populated DTO with calculated fields.
      */
     private DiscountedProductDTO mapToDTO(Discount discount){
-        Double originalPrice = discount.getProduct().getPrice();
+        // Match the product by productId and storeName
+        Optional<Product> optionalProduct = productRepository.findByProductIdAndStoreNameIgnoreCase(
+                discount.getProductId(), discount.getStoreName()
+        );
+
+        if (optionalProduct.isEmpty()) {
+            throw new IllegalArgumentException("No matching product found for discount: " + discount.getProductId());
+        }
+
+        Product product = optionalProduct.get();
+        Double originalPrice = product.getPrice();
+        Currency currency = product.getCurrency();
+
         double discountedPrice = originalPrice * (1 - discount.getPercentage() / 100.0);
 
         // Convert to RON for better comparison
-        Currency currency = discount.getProduct().getCurrency();
         switch (currency) {
             case USD:
                 originalPrice *= 4.6;
@@ -124,13 +141,15 @@ public class DiscountService {
         return new DiscountedProductDTO(
                 discount.getName(),
                 discount.getBrand(),
+                discount.getProductId(),
                 discount.getCategory(),
-                originalPrice,
+                round(originalPrice),
                 discount.getPercentage(),
                 round(discountedPrice),
                 currency,
                 round(pricePerUnit),
-                discount.getPackageUnit()
+                discount.getPackageUnit(),
+                discount.getStoreName()
         );
     }
 

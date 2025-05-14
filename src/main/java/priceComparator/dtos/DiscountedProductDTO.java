@@ -1,5 +1,6 @@
 package priceComparator.dtos;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,13 @@ public class DiscountedProductDTO {
      * Brand of the discounted product.
      */
     private String brand;
+
+    /**
+     * External/business product ID this discount refers to.
+     *
+     */
+    @Column(nullable = false)
+    private String productId;
 
     /**
      * Product category (e.g., "lactate", "băuturi").
@@ -62,4 +70,9 @@ public class DiscountedProductDTO {
      */
     @Enumerated(EnumType.STRING)
     private PackageUnit packageUnit;
+
+    /**
+     * Store that offers the discounted product.
+     */
+    private String storeName;
 }
