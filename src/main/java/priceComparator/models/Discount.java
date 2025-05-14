@@ -12,8 +12,7 @@ import java.time.LocalDate;
 
 /**
  * Represents a discount associated with a product.
- * Contains information such as the discount percentage,
- * applicable date range, and product packaging details.
+ * Contains information such as the discount percentage, applicable date range, and product packaging details.
  */
 @Entity
 @Getter
