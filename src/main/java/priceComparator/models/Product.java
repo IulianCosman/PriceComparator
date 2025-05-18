@@ -62,7 +62,7 @@ public class Product {
      * Quantity in the package (e.g., 1, 0.5).
      */
     @Column(nullable = false)
-    private String packageQuantity;
+    private Double packageQuantity;
 
     /**
      * The current price of the product (without discount), in the original currency.

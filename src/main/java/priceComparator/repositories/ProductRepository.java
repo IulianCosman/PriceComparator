@@ -11,13 +11,16 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     /**
-     * Method that fetches a {@link Product} based on productId and name of the store.
-     * Used to fetch products to apply discounts to.
+     * Method that fetches the most recently added {@link Product}
+     * based on productId and storeName (case-insensitive).
+     * Used to calculate the discounted product by fetching the most recent
+     * product price added to the DB.
      *
      * @param productId the business id of the product.
-     * @param storeName the name of the store where the product is found.
-     * @return the {@link Product} entity.
+     * @param storeName the name of the store.
+     * @return the most recent {@link Product} for the given ID and store.
      */
-    Optional<Product> findByProductIdAndStoreNameIgnoreCase(String productId, String storeName);
+    Optional<Product> findTopByProductIdAndStoreNameIgnoreCaseOrderByDateAddedDesc(String productId, String storeName);
+
 
 }

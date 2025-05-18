@@ -39,37 +39,25 @@ public class DiscountedProductDTO {
     private String category;
 
     /**
-     * Original price before discount.
+     * Original price before discount in RON.
      */
     private Double originalPrice;
 
     /**
      * Percentage of the discount [0-100].
      */
-    private Integer discount;
+    private Integer discountPercentage;
 
     /**
-     * Final price after discount.
+     * Final price after discount in RON.
      */
     private Double discountedPrice;
 
     /**
-     * Currency in which the price is expressed, serialized as a string value.
-     * All instances of the DTO will have the price transformed to RON for fair comparison.
+     * Price per unit of measurement (e.g. 100 RON/kg).
+     * All price per unit will be in RON, kg for mass and l for volume for fair comparison.
      */
-    @Enumerated(EnumType.STRING)
-    private Currency currency;
-
-    /**
-     * Price per unit of measurement.
-     */
-    private Double pricePerUnit;
-
-    /**
-     * Unit of the package (e.g., kg, l, buc).
-     */
-    @Enumerated(EnumType.STRING)
-    private PackageUnit packageUnit;
+    private String pricePerUnit;
 
     /**
      * Store that offers the discounted product.
