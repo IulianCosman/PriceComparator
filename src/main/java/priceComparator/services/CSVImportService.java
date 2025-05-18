@@ -61,7 +61,7 @@ public class CSVImportService {
                 product.setName(line[1]);
                 product.setCategory(line[2]);
                 product.setBrand(line[3]);
-                product.setPackageQuantity(line[4]);
+                product.setPackageQuantity(Double.parseDouble(line[4]));
                 product.setPackageUnit(PackageUnit.valueOf(line[5]));
                 product.setPrice(Double.parseDouble(line[6]));
                 product.setCurrency(Currency.valueOf(line[7].toUpperCase(Locale.ROOT)));
@@ -135,10 +135,23 @@ public class CSVImportService {
      */
     private LocalDate extractDate(String filename) {
         try {
-            String datePart = filename.split("_")[1].replace(".csv", "");
+
+            String[] parts = filename.replace(".csv", "").split("_");
+            String datePart;
+
+            if (parts.length == 2) {
+                // Format: store_yyyy-MM-dd
+                datePart = parts[1];
+            } else if (parts.length == 3) {
+                // Format: store_discounts_yyyy-MM-dd
+                datePart = parts[2];
+            } else {
+                throw new IllegalArgumentException("Filename format not supported");
+            }
             return LocalDate.parse(datePart);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid filename format. Must be like 'store_yyyy-MM-dd.csv'");
         }
     }
+
 }

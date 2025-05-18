@@ -1,6 +1,4 @@
 package priceComparator.services;
-
-import priceComparator.models.Discount;
 import priceComparator.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import priceComparator.dtos.DiscountedProductDTO;
+import priceComparator.services.DiscountQueryService;
 import priceComparator.services.DiscountService;
 
 import java.util.List;
@@ -20,6 +21,8 @@ public class DiscountController {
     @Autowired
     private DiscountService discountService;
 
+    @Autowired
+    private DiscountQueryService discountQueryService;
     /**
      * Retrieves all discounts from the database (including expired).
      *
@@ -65,18 +68,7 @@ public class DiscountController {
      */
     @GetMapping("/current")
     public List<DiscountedProductDTO> getAllCurrentDiscounts() {
-        return discountService.getAllCurrentDiscounts();
-    }
-
-    /**
-     * Retrieves top discounted products sorted by price per unit.
-     *
-     * @param limit the maximum number of results to return (default is 5).
-     * @return a list of {@link DiscountedProductDTO} with best price/unit deals.
-     */
-    @GetMapping("/topPricePerUnit")
-    public List<DiscountedProductDTO> getTopDiscountsByPricePerUnit(@RequestParam(defaultValue = "5") int limit) {
-        return discountService.getTopDiscountsByPricePerUnit(limit);
+        return discountQueryService.getAllCurrentDiscounts();
     }
 
     /**
@@ -87,7 +79,7 @@ public class DiscountController {
      */
     @GetMapping("/topDiscount")
     public List<DiscountedProductDTO> getTopDiscountsByDiscount(@RequestParam(defaultValue = "5") int limit) {
-        return discountService.getTopDiscountsByDiscount(limit);
+        return discountQueryService.getTopDiscountsByDiscount(limit);
     }
 
 }
