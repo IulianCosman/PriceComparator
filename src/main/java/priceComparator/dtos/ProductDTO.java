@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 
 /**
- * Data Transfer Object used to encapsulate and transport information about discounted products across layers.
+ * Data Transfer Object used to encapsulate and transport information about products across layers.
  * This class is not persistent in the database and is intended for read-only views.
  */
 @Data
