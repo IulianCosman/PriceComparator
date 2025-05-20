@@ -12,6 +12,7 @@ import priceComparator.repositories.ProductRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,22 @@ public class DiscountQueryService {
 
     @Autowired
     private DiscountRepository discountRepository;
+
+    /**
+     * Retrieves the discounts added today/ yesterday.
+     *
+     * @return a list of {@link DiscountedProductDTO} with info of the newly added discounts.
+     */
+    public List<DiscountedProductDTO> getNewDiscounts(){
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+
+        List<Discount> newDiscounts = discountRepository.findByDateAddedIn(List.of(today, yesterday));
+
+        return newDiscounts.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 
     /**
      * Retrieves the top N discounts sorted by discount percentage in descending order.

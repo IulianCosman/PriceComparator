@@ -41,4 +41,12 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
             "AND (:category IS NULL OR LOWER(d.category) = LOWER(:category))")
     List<Discount> searchActiveDiscounts(@Param("now") LocalDate now,@Param("name") String name, @Param("brand") String brand, @Param("category") String category);
 
+    /**
+     * Returns discounts that have dateAdded in a list of given dates.
+     * Used for seeing which discounts have been added today/yesterday.
+     *
+     * @param dates    The list of dates in which dateAdded should be.
+     * @return List of matching discounts.
+     */
+    List<Discount> findByDateAddedIn(List<LocalDate> dates);
 }

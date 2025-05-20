@@ -21,8 +21,6 @@ public class DiscountController {
     @Autowired
     private DiscountService discountService;
 
-    @Autowired
-    private DiscountQueryService discountQueryService;
     /**
      * Retrieves all discounts from the database (including expired).
      *
@@ -59,27 +57,6 @@ public class DiscountController {
         else{
             return ResponseEntity.notFound().build();
         }
-    }
-
-    /**
-     * Retrieves all currently active discounts.
-     *
-     * @return a list of {@link DiscountedProductDTO} representing active discounts.
-     */
-    @GetMapping("/current")
-    public List<DiscountedProductDTO> getAllCurrentDiscounts() {
-        return discountQueryService.getAllCurrentDiscounts();
-    }
-
-    /**
-     * Retrieves top discounted products sorted by discount percentage.
-     *
-     * @param limit the maximum number of results to return (default is 5).
-     * @return a list of {@link DiscountedProductDTO} with highest discounts.
-     */
-    @GetMapping("/topDiscount")
-    public List<DiscountedProductDTO> getTopDiscountsByDiscount(@RequestParam(defaultValue = "5") int limit) {
-        return discountQueryService.getTopDiscountsByDiscount(limit);
     }
 
 }
