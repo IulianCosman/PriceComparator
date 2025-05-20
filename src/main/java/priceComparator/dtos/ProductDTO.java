@@ -1,20 +1,18 @@
 package priceComparator.dtos;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import priceComparator.models.Currency;
-import priceComparator.models.PackageUnit;
+import lombok.Getter;
 
 /**
  * Data Transfer Object used to encapsulate and transport information about discounted products across layers.
  * This class is not persistent in the database and is intended for read-only views.
  */
 @Data
+@Getter
 @AllArgsConstructor
-public class DiscountedProductDTO {
+public class ProductDTO {
 
     /**
      * Name of the discounted product
