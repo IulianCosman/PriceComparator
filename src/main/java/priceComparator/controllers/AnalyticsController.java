@@ -3,6 +3,7 @@ package priceComparator.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import priceComparator.dtos.PriceHistoryPointDTO;
 import priceComparator.dtos.ProductDTO;
 import priceComparator.models.Discount;
 import java.util.Map;
@@ -10,10 +11,11 @@ import priceComparator.models.Product;
 import priceComparator.services.AnalyticsService;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * REST controller that handles HTTP requests related to analytics of {@link Product} and {@link Discount} entities.
- * Provides endpoints to see top/ current/ new discounts .
+ * Provides endpoints to see top/ current/ new discounts, optimize basket, see price history .
  */
 @RestController
 @RequestMapping("/analytics")
@@ -29,8 +31,8 @@ public class AnalyticsController {
      * @return a list of {@link ProductDTO} representing active discounts.
      */
     @GetMapping("/currentDiscounts")
-    public List<ProductDTO> getAllCurrentDiscounts() {
-        return analyticsService.getAllCurrentDiscounts();
+    public ResponseEntity<List<ProductDTO>> getAllCurrentDiscounts() {
+        return ResponseEntity.ok(analyticsService.getAllCurrentDiscounts());
     }
 
     /**
@@ -40,8 +42,8 @@ public class AnalyticsController {
      * @return a list of {@link ProductDTO} with highest discounts.
      */
     @GetMapping("/topDiscounts")
-    public List<ProductDTO> getTopDiscountsByDiscount(@RequestParam(defaultValue = "5") int limit) {
-        return analyticsService.getTopDiscountsByDiscount(limit);
+    public ResponseEntity<List<ProductDTO>> getTopDiscountsByDiscount(@RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(analyticsService.getTopDiscountsByDiscount(limit));
     }
 
     /**
@@ -50,8 +52,8 @@ public class AnalyticsController {
      * @return a list of {@link ProductDTO} with info of newly added discounts.
      */
     @GetMapping("/newDiscounts")
-    public List<ProductDTO> getNewDiscounts(){
-        return analyticsService.getNewDiscounts();
+    public ResponseEntity<List<ProductDTO>> getNewDiscounts(){
+        return ResponseEntity.ok(analyticsService.getNewDiscounts());
     }
 
     /**
@@ -82,4 +84,31 @@ public class AnalyticsController {
         Map<String, List<ProductDTO>> grouped = analyticsService.getOptimizedBasketGroupedByStore(productNames);
         return ResponseEntity.ok(grouped);
     }
+
+    /**
+     * Returns the full price history timeline of a given product name,
+     * including price changes and discount intervals. Optionally filters by store, brand, or category.
+     *
+     * @param productName the product name to fetch history for
+     * @param storeName optional store name to filter by
+     * @param category optional product category
+     * @param brand optional brand name
+     * @return list of time-segmented price points
+     */
+    @GetMapping("/priceHistory")
+    public ResponseEntity<List<PriceHistoryPointDTO>> getPriceHistory(
+            @RequestParam String productName,
+            @RequestParam(required = false) String storeName,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String brand
+    ) {
+        List<PriceHistoryPointDTO> history = analyticsService.getPriceHistory(
+                productName,
+                Optional.ofNullable(storeName),
+                Optional.ofNullable(category),
+                Optional.ofNullable(brand)
+        );
+        return ResponseEntity.ok(history);
+    }
+
 }

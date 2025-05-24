@@ -25,8 +25,8 @@ public class DiscountController {
      * @return a list of all {@link Discount} entities.
      */
     @GetMapping
-    public List<Discount> getAllDiscounts(){
-        return discountService.getAllDiscounts();
+    public ResponseEntity<List<Discount>> getAllDiscounts(){
+        return ResponseEntity.ok(discountService.getAllDiscounts());
     }
 
     /**
@@ -36,8 +36,8 @@ public class DiscountController {
      * @return the saved {@link Discount}.
      */
     @PostMapping
-    public Discount createDiscount(@RequestBody Discount discount){
-        return discountService.saveDiscount(discount);
+    public ResponseEntity<Discount> createDiscount(@RequestBody Discount discount){
+        return ResponseEntity.ok(discountService.saveDiscount(discount));
     }
 
     /**

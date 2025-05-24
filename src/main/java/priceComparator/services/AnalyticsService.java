@@ -2,6 +2,7 @@ package priceComparator.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import priceComparator.dtos.PriceHistoryPointDTO;
 import priceComparator.dtos.ProductDTO;
 import priceComparator.mappers.ProductMapper;
 import priceComparator.models.Discount;
@@ -10,11 +11,10 @@ import priceComparator.repositories.DiscountRepository;
 import priceComparator.repositories.ProductRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static priceComparator.mappers.ProductMapper.round;
 
 /**
  * Service layer for managing business logic related to analytics of {@link Discount} and {@link Product}.
@@ -164,6 +164,122 @@ public class AnalyticsService {
         // Group the best deals by store name
         return optimizedList.stream()
                 .collect(Collectors.groupingBy(ProductDTO::getStoreName));
+    }
+
+    /**
+     * Retrieves the complete price history of a product, including all historical price entries
+     * and any applied discounts, grouped and segmented by store.
+     * The result allows a frontend to construct a time-series graph of price changes.
+     * Supports optional filtering by store, product category, and brand.
+     * Logic:
+     * - Gathers all product entries for the given product name, ordered chronologically.
+     * - Filters the products based on optional store/category/brand.
+     * - Groups products by store and iterates through each store's entries.
+     * For each product entry:
+     * - Determines the time range it was valid (from its dateAdded until the next entry or today).
+     * - Identifies overlapping discounts during that time frame.
+     * - Splits the time interval into segments:
+     *     - Un-discounted before a discount starts,
+     *     - Discounted during discount interval,
+     *     - Un-discounted after discount ends (if applicable).
+     *
+     * @param productName the product to get history for (required)
+     * @param storeName optional store to filter by
+     * @param category optional category to filter by
+     * @param brand optional brand to filter by
+     * @return a list of {@link PriceHistoryPointDTO}, each representing a price value over a specific date interval
+     */
+
+    public List<PriceHistoryPointDTO> getPriceHistory(
+            String productName,
+            Optional<String> storeName,
+            Optional<String> category,
+            Optional<String> brand
+    ) {
+        LocalDate today = LocalDate.now();
+
+        // Fetch product entries by name, ordered by date
+        List<Product> allProducts = productRepository.findByNameIgnoreCaseOrderByDateAddedAsc(productName)
+                .stream()
+                .filter(p -> storeName.map(s -> s.equalsIgnoreCase(p.getStoreName())).orElse(true))
+                .filter(p -> category.map(c -> c.equalsIgnoreCase(p.getCategory())).orElse(true))
+                .filter(p -> brand.map(b -> b.equalsIgnoreCase(p.getBrand())).orElse(true))
+                .toList();
+
+        if (allProducts.isEmpty()) return List.of();
+
+        // Group product entries by store
+        Map<String, List<Product>> groupedByStore = allProducts.stream()
+                .collect(Collectors.groupingBy(p -> p.getStoreName().toLowerCase()));
+
+        List<Discount> discounts = discountRepository.findByNameIgnoreCase(productName);
+        List<PriceHistoryPointDTO> history = new ArrayList<>();
+
+        // Iterate through the stores
+        for (var entry : groupedByStore.entrySet()) {
+            String store = entry.getKey();
+            List<Product> products = entry.getValue();
+
+            // Iterate through the product entries of this store
+            for (int i = 0; i < products.size(); i++) {
+                Product current = products.get(i);
+
+                // DateFrom for this entry is set as the date it was added
+                LocalDate dateFrom = current.getDateAdded();
+
+                // DateTo for this entry is set as the date when the next entry was added
+                // If this is the latest entry the dateTo is set to today
+                LocalDate dateTo = (i < products.size() - 1) ? products.get(i + 1).getDateAdded() : today;
+
+                double originalPrice = ProductMapper.convertToRon(current.getPrice(), current.getCurrency());
+
+                // See if any discounts were available at the time when the entry with this price was available
+                List<Discount> overlapping = discounts.stream()
+                        .filter(d -> d.getStoreName().equalsIgnoreCase(store))
+                        .filter(d -> !d.getDateTo().isBefore(dateFrom) && !d.getDateFrom().isAfter(dateTo))
+                        .toList();
+
+                if (overlapping.isEmpty()) {
+                    // There are no discounts overlapping, so we just add the price history point
+                    history.add(new PriceHistoryPointDTO(dateFrom, dateTo, round(originalPrice), false, current.getStoreName(), current.getBrand()));
+                } else {
+                    LocalDate segmentStart = dateFrom;
+                    for (Discount d : overlapping) {
+
+                        // First iteration:
+                        // Make sure the discountStart is after the dateFrom for the product
+                        // Ensures we don't apply a discount to an entry before it existed
+
+                        // Other iterations:
+                        // We use the correct discountStart
+                        LocalDate discountStart = Collections.max(List.of(dateFrom, d.getDateFrom()));
+
+                        // Same logic as above
+                        LocalDate discountEnd = Collections.min(List.of(dateTo, d.getDateTo()));
+
+                        // If the discount is applied after some time we add a price history point
+                        // For the un-discounted price in that time frame before the discount
+                        if (segmentStart.isBefore(discountStart)) {
+                            history.add(new PriceHistoryPointDTO(segmentStart, discountStart, round(originalPrice), false, current.getStoreName(), current.getBrand()));
+                        }
+
+                        // We add a price history point for the discounted Price
+                        double discountedPrice = round(originalPrice * (1 - d.getPercentage() / 100.0));
+                        history.add(new PriceHistoryPointDTO(discountStart, discountEnd, discountedPrice, true, current.getStoreName(), current.getBrand()));
+
+                        // Move segmentStart forward
+                        segmentStart = discountEnd;
+                    }
+
+                    // Add a price history point (if it is needed) for the un-discounted price after all discounts ended
+                    if (segmentStart.isBefore(dateTo)) {
+                        history.add(new PriceHistoryPointDTO(segmentStart, dateTo, round(originalPrice), false, current.getStoreName(), current.getBrand()));
+                    }
+                }
+            }
+        }
+
+        return history;
     }
 
 }

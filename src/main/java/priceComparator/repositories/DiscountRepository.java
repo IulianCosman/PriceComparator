@@ -1,5 +1,6 @@
 package priceComparator.repositories;
 
+import priceComparator.models.Product;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import priceComparator.models.Discount;
@@ -26,22 +27,6 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
     List<Discount> findActiveDiscounts(@Param("now")LocalDate now);
 
     /**
-     * Searches for currently active discounts matching optional filters.
-     * If a filter is null, it is ignored in the query.
-     *
-     * @param now      The current date to check discount validity.
-     * @param name     Optional product name filter (partial match, case-insensitive).
-     * @param brand    Optional brand filter (exact match, case-insensitive).
-     * @param category Optional category filter (exact match, case-insensitive).
-     * @return List of matching active discounts.
-     */
-    @Query("SELECT d FROM Discount d WHERE :now BETWEEN d.dateFrom AND d.dateTo " +
-            "AND (:name  IS NULL OR LOWER(d.name) LIKE LOWER(CONCAT('%' , :name, '%')))" +
-            "AND (:brand IS NULL OR LOWER(d.brand) = LOWER(:brand))" +
-            "AND (:category IS NULL OR LOWER(d.category) = LOWER(:category))")
-    List<Discount> searchActiveDiscounts(@Param("now") LocalDate now,@Param("name") String name, @Param("brand") String brand, @Param("category") String category);
-
-    /**
      * Returns discounts that have dateAdded in a list of given dates.
      * Used for seeing which discounts have been added today/yesterday.
      *
@@ -49,4 +34,13 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
      * @return List of matching discounts.
      */
     List<Discount> findByDateAddedIn(List<LocalDate> dates);
+
+    /**
+     * Returns a list of discounts for a given {@link Product} that existed.
+     * Used to show price history.
+     *
+     * @param productName the name of the {@link Product}
+     * @return a list of matching discounts for that {@link Product}
+     */
+    List<Discount> findByNameIgnoreCase(String productName);
 }

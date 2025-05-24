@@ -32,6 +32,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<String> findAllDistinctStoreNames();
 
     /**
+     * Method that retrieves all {@link Product} entries that match a name.
+     * Used for showing price trends over time.
+     *
+     * @param productName the name of the {@link Product}.
+     * @return a list of {@link Product} entries.
+     */
+    List<Product> findByNameIgnoreCaseOrderByDateAddedAsc(String productName);
+
+    /**
      * Method that fetches the most recently added {@link Product} based on name and storeName (case-insensitive).
      * Used to optimize ProductList/ ShoppingCart.
      *
