@@ -24,8 +24,8 @@ public class ProductController {
      * @return a list of all {@link Product} entities.
      */
     @GetMapping
-    public List<Product> getAllProducts(){
-        return productService.getAllProducts();
+    public ResponseEntity<List<Product>> getAllProducts(){
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     /**
@@ -35,8 +35,8 @@ public class ProductController {
      * @return the saved {@link Product} entity.
      */
     @PostMapping
-    public Product createProduct(@RequestBody Product product){
-        return productService.saveProduct(product);
+    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+        return ResponseEntity.ok(productService.saveProduct(product));
     }
 
     /**

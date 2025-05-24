@@ -88,7 +88,7 @@ public class ProductMapper {
      * @param currency the currency in which the price is expressed.
      * @return the equivalent price in RON.
      */
-    private double convertToRon(double price, Currency currency) {
+    public static double convertToRon(double price, Currency currency) {
         return switch (currency) {
             case USD -> price * 4.6;
             case EUR -> price * 5.0;
@@ -130,7 +130,7 @@ public class ProductMapper {
      * @param value the value to round.
      * @return the rounded value.
      */
-    private double round(double value) {
+    public static double round(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
 
