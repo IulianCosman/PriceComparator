@@ -32,6 +32,8 @@ public class AnalyticsService {
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private PriceEvaluatorService priceEvaluatorService;
 
     /**
      * Retrieves the discounts added today/ yesterday.
@@ -101,49 +103,12 @@ public class AnalyticsService {
      * @return list of {@link ProductDTO} objects, each representing the cheapest store-specific offer
      */
     public List<ProductDTO> getOptimizedProductList(List<String> productNames) {
-        LocalDate today = LocalDate.now();
-        List<String> stores = productRepository.findAllDistinctStoreNames();
-        List<Discount> activeDiscounts = discountRepository.findActiveDiscounts(today);
-
-        // Group discounts for quick lookup by productId+store
-        Map<String, Discount> discountMap = activeDiscounts.stream()
-                .collect(Collectors.toMap(
-                        d -> d.getProductId() + "|" + d.getStoreName().toLowerCase(),
-                        d -> d,
-                        (d1, d2) -> d1 // if duplicate, keep first
-                ));
 
         List<ProductDTO> optimizedList = new ArrayList<>();
 
         for (String productName : productNames) {
-            ProductDTO best = null;
-
-            for (String store : stores) {
-                // Find the most recent product by name + store
-                Optional<Product> optionalProduct = productRepository
-                        .findTopByNameIgnoreCaseAndStoreNameIgnoreCaseOrderByDateAddedDesc(productName, store);
-
-                // Skip if the product does not exist in the store
-                if (optionalProduct.isEmpty()) continue;
-
-                Product product = optionalProduct.get();
-                Discount discount = discountMap.get(product.getProductId() + "|" + store.toLowerCase());
-
-                ProductDTO dto = (discount != null)
-                        ? productMapper.mapToDTOWithDiscount(discount,
-                        productRepository.findTopByProductIdAndStoreNameIgnoreCaseOrderByDateAddedDesc(
-                                discount.getProductId(), discount.getStoreName())) // discount exists, so apply
-                        : productMapper.mapToDTOWithoutDiscount(product); // no discount, so raw price
-
-                // Keep the one with the lowest price
-                if (best == null || dto.getDiscountedPrice() < best.getDiscountedPrice()) {
-                    best = dto;
-                }
-            }
-
-            if (best != null) {
-                optimizedList.add(best);
-            }
+            Optional<ProductDTO> best = priceEvaluatorService.getProductWithLowestPrice(productName);
+            best.ifPresent(optimizedList::add);
         }
 
         return optimizedList;
@@ -208,7 +173,7 @@ public class AnalyticsService {
 
         if (allProducts.isEmpty()) return List.of();
 
-        // Group product entries by store
+        // Group product entries by store (useless if storeName is given as parameter)
         Map<String, List<Product>> groupedByStore = allProducts.stream()
                 .collect(Collectors.groupingBy(p -> p.getStoreName().toLowerCase()));
 
@@ -256,6 +221,9 @@ public class AnalyticsService {
 
                         // Same logic as above
                         LocalDate discountEnd = Collections.min(List.of(dateTo, d.getDateTo()));
+
+                        // Skip if the discount interval is zero-length
+                        if (discountStart.equals(discountEnd)) continue;
 
                         // If the discount is applied after some time we add a price history point
                         // For the un-discounted price in that time frame before the discount
