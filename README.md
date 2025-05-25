@@ -114,7 +114,7 @@ A backend service for comparing product prices across multiple Romanian grocery 
 
 ⚠️ Security Notice:
 
-- Previous commits were rewritten to remove accidentally committed credentials. No confidential information is currently present in the repository.
+- Previous commits were rewritten to remove accidentally committed credentials. No confidential information is currently present in the repository (application.properties was removed from the commits).
 
 🧠 What could be improved
 
