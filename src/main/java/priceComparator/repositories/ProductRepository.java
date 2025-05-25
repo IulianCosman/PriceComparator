@@ -1,6 +1,7 @@
 package priceComparator.repositories;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import priceComparator.models.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -32,15 +33,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<String> findAllDistinctStoreNames();
 
     /**
-     * Method that retrieves all {@link Product} entries that match a name.
-     * Used for showing price trends over time.
-     *
-     * @param productName the name of the {@link Product}.
-     * @return a list of {@link Product} entries.
-     */
-    List<Product> findByNameIgnoreCaseOrderByDateAddedAsc(String productName);
-
-    /**
      * Method that fetches the most recently added {@link Product} based on name and storeName (case-insensitive).
      * Used to optimize ProductList/ ShoppingCart.
      *
@@ -49,4 +41,29 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      * @return the most recent {@link Product} for the given ID and store.
      */
     Optional<Product> findTopByNameIgnoreCaseAndStoreNameIgnoreCaseOrderByDateAddedDesc(String productName, String store);
+
+    /**
+     * Retrieves and filters product entries by name, store, brand, or category.
+     * Used for price history.
+     *
+     * @param name name of the product to analyze
+     * @param store optional store filter
+     * @param category optional category filter
+     * @param brand optional brand filter
+     * @return a list of {@link Product} objects that match the filters.
+     */
+    @Query("""
+    SELECT p FROM Product p
+    WHERE LOWER(p.name) = LOWER(:name)
+      AND (:store IS NULL OR LOWER(p.storeName) = LOWER(:store))
+      AND (:category IS NULL OR LOWER(p.category) = LOWER(:category))
+      AND (:brand IS NULL OR LOWER(p.brand) = LOWER(:brand))
+    ORDER BY p.dateAdded ASC
+""")
+    List<Product> findFilteredProducts(
+            @Param("name") String name,
+            @Param("store") String store,
+            @Param("category") String category,
+            @Param("brand") String brand
+    );
 }

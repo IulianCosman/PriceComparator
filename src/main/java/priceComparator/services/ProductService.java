@@ -26,7 +26,7 @@ public class ProductService {
     }
 
     /**
-     * Saves a new discount.
+     * Saves a new product.
      *
      * @param product the {@link Product} to save.
      * @return the persisted {@link Product} entity.
@@ -44,4 +44,5 @@ public class ProductService {
     public Product getProductById(Long id) {
         return productRepository.findById(id).orElse(null);
     }
+
 }

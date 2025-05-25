@@ -38,20 +38,11 @@ public class PriceEvaluatorService {
      * @return a {@link ProductDTO} containing the info of product.
      */
     public Optional<ProductDTO> getProductWithLowestPrice(String productName) {
-        Optional<ProductDTO> best = null;
-
-        LocalDate today = LocalDate.now();
+        Optional<ProductDTO> best = Optional.empty();
+        Map<String, Discount> discountMap = getActiveDiscountMap();
         List<String> stores = productRepository.findAllDistinctStoreNames();
-        List<Discount> activeDiscounts = discountRepository.findActiveDiscounts(today);
 
-        // Group discounts for quick lookup by productId+store
-        Map<String, Discount> discountMap = activeDiscounts.stream()
-                .collect(Collectors.toMap(
-                        d -> d.getProductId() + "|" + d.getStoreName().toLowerCase(),
-                        d -> d,
-                        (d1, d2) -> d1 // if duplicate, keep first
-                ));
-
+        // Iterate through the stores
         for (String store : stores) {
             // Find the most recent product by name + store
             Optional<Product> optionalProduct = productRepository
@@ -61,6 +52,7 @@ public class PriceEvaluatorService {
             if (optionalProduct.isEmpty()) continue;
 
             Product product = optionalProduct.get();
+            // We assume one discount can be available at a time
             Discount discount = discountMap.get(product.getProductId() + "|" + store.toLowerCase());
 
             ProductDTO dto = (discount != null)
@@ -70,11 +62,29 @@ public class PriceEvaluatorService {
                     : productMapper.mapToDTOWithoutDiscount(product); // no discount, so raw price
 
             // Keep the one with the lowest price
-            if (best == null || dto.getDiscountedPrice() < best.get().getDiscountedPrice()) {
+            if (best.isEmpty() || dto.getDiscountedPrice() < best.get().getDiscountedPrice()) {
                 best = Optional.of(dto);
             }
         }
         return best;
+    }
+
+    /**
+     * Builds a map for quick discount lookup using productId + storeName as key.
+     * @return map of  <(productId|store)| Discount>
+     */
+    private Map<String, Discount> getActiveDiscountMap() {
+        LocalDate today = LocalDate.now();
+        // We assume one discount active at a time
+        List<Discount> activeDiscounts = discountRepository.findActiveDiscounts(today);
+
+        // Group discounts for quick lookup by productId+store
+        return activeDiscounts.stream()
+                .collect(Collectors.toMap(
+                        d -> d.getProductId() + "|" + d.getStoreName().toLowerCase(),
+                        d -> d,
+                        (d1, d2) -> d1 // if duplicate, keep first
+                ));
     }
 }
 
