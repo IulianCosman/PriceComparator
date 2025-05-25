@@ -116,4 +116,10 @@ A backend service for comparing product prices across multiple Romanian grocery 
 
 - Previous commits were rewritten to remove accidentally committed credentials. No confidential information is currently present in the repository.
 
+🧠 What could be improved
 
+- Creating a login/ sign-up system so that the alerts show up in app, and are not only sent by email
+
+- If the database becomes more complex, e.g. more tables are created (Customers, Suppliers, Expired Products etc.), introducing a composite primary key on the Product and Discount tables for ensuring that the data is introduced correctly and introducing foreign keys between the tables would be a plus - deemed it not needed for now as the data is read from .csv files and the database was quite simple. A composite key for the way i modeled the database would be productId + dateAdded + storeName for the Product table and the Discount table - with constraints on the dateFrom and dateTo fields in the Discount table so that 2 discounts could not be active on the same product at a store at the same time (for my project i took the liberty of assuming the .csv files were correct and this wouldn't happen)
+
+- I only highlighted price per unit in the analytics part, haven't take it into account in the optimizing the basket functionality
